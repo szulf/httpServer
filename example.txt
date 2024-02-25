@@ -1,0 +1,2 @@
+this is an example text
+used just to check if the server works
