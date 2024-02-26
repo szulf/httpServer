@@ -21,16 +21,21 @@ void *handle_client(void *arg)
     }
 
     regex_t regex;
-    regcomp(&regex, "^GET /([^ ]*) HTTP/1.1", REG_EXTENDED);
-    regmatch_t matches[2];
+    regcomp(&regex, "^([^ ]*) /([^ ]*) HTTP/1.1", REG_EXTENDED);
+    regmatch_t matches[3];
 
     printf("%s", buffer);
 
-    if (regexec(&regex, buffer, 2, matches, 0) == 0)
+    if (regexec(&regex, buffer, 3, matches, 0) == 0)
     {
-        buffer[matches[1].rm_eo] = '\0'; // end of regex match is end of buffer
-        const char *encoded_file_path = buffer + matches[1].rm_so; // setting encoded file path as buffer that starts at start of regex match
+        //Getting the file path
+        buffer[matches[2].rm_eo] = '\0';
+        const char *encoded_file_path = buffer + matches[2].rm_so;
         char *file_path = url_decode(encoded_file_path);
+
+        // Getting the request method
+        buffer[matches[1].rm_eo] = '\0';
+        const char *request_type = buffer + matches[1].rm_so;
 
         const char *file_type = get_file_type(get_file_extension(file_path));
         
@@ -40,6 +45,11 @@ void *handle_client(void *arg)
         int file_fd = open(file_path, O_RDONLY);
         if (file_fd != -1)
         {
+            // Checking if the http request method is get and so on
+            // Then ideally some cleaner solution than a bunch of ifs
+            // Or at least ifs that go to certain methods
+            // But that would equal a bunch of boilerplate i feel like
+
             snprintf(response, BUFFER_SIZE, 
                     "HTTP/1.1 200 OK\r\n"
                     "Content-Type: %s\r\n"
