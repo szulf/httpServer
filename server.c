@@ -9,7 +9,6 @@
 
 int main(int argc, char **argv)
 {
-
     struct sockaddr_in my_addr;
     my_addr.sin_family = AF_INET;
     my_addr.sin_addr.s_addr = htonl(INADDR_ANY);
@@ -65,5 +64,6 @@ int main(int argc, char **argv)
         exit(0);
     }
 
+    close(server_fd);
     return 0;
 }

@@ -35,52 +35,49 @@ void *handle_client(void *arg)
 
         // Getting the request method
         buffer[matches[1].rm_eo] = '\0';
-        const char *request_type = buffer + matches[1].rm_so;
+        const char *request_method = buffer + matches[1].rm_so;
 
         const char *file_type = get_file_type(get_file_extension(file_path));
         
         char *response = (char *) malloc(BUFFER_SIZE * sizeof(char));
-        int response_len;
+        char *response_body = (char *) malloc((BUFFER_SIZE - HEADER_SIZE) * sizeof(char));
+        // do zmiany rozmiar tych dwoch zmiennych, zeby nie bylo mozliwosci wyjscia poza BUFFER_SIZE
+        int response_len = 0;
+        int response_body_len = 0;
 
         int file_fd = open(file_path, O_RDONLY);
         if (file_fd != -1)
         {
-            // Checking if the http request method is get and so on
-            // Then ideally some cleaner solution than a bunch of ifs
-            // Or at least ifs that go to certain methods
-            // But that would equal a bunch of boilerplate i feel like
-
-            snprintf(response, BUFFER_SIZE, 
-                    "HTTP/1.1 200 OK\r\n"
-                    "Content-Type: %s\r\n"
-                    "\r\n"
-                    , file_type);
-            response_len = strlen(response);
-            
-            int bytes_read;
-            while ((bytes_read = read(file_fd, response + response_len, BUFFER_SIZE - response_len)))
+            // Checking if the http request method is get or post
+            if (strcmp(request_method, "GET") == 0)
             {
-                response_len += bytes_read;
+                build_response_body(file_fd, response_body, &response_body_len);
+                build_response(file_type, response_body_len, response_body, response, &response_len);
+
             }
-        } else
+            else if (strcmp(request_method, "POST") == 0)
+            {
+                //build_post_reponse();
+                // Not implemented yet
+                // No idea how to do it or how it works
+            }
+        }
+        else
         {
-            snprintf(response, BUFFER_SIZE, 
-                    "HTTP/1.1 404 Not Found\r\n"
-                    "Content-Type: text/plain\r\n"
-                    "\r\n"
-                    );
-            response_len = strlen(response);
+            build_404_response(response, &response_len);
         }
 
         if (send(client_fd, response, response_len, 0) < 0)
         {
             perror("Error sending the response");
-            return NULL;
+            exit(0);
         }
 
         close(file_fd);
         free(response);
         response = NULL;
+        free(response_body);
+        response_body = NULL;
         free(file_path);
         file_path = NULL;
     }
