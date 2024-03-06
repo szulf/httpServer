@@ -12,9 +12,5 @@ char *get_file_type(const char*);
 void build_response_body(int, char *, int *);
 void build_response(const char*, int, const char*, char*, int*);
 void build_404_response(char *, int *);
-// void build_200_header(const char *, char *, int *);
-// void build_404_header(char *, int *);
-// void build_get_response(const char *, const char *, int, char *, int *);
-// void build_404_response(char *, int *);
 
 #endif

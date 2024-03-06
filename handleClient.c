@@ -40,9 +40,8 @@ void *handle_client(void *arg)
         const char *file_type = get_file_type(get_file_extension(file_path));
         
         char *response = (char *) malloc(BUFFER_SIZE * sizeof(char));
-        char *response_body = (char *) malloc((BUFFER_SIZE - HEADER_SIZE) * sizeof(char));
-        // do zmiany rozmiar tych dwoch zmiennych, zeby nie bylo mozliwosci wyjscia poza BUFFER_SIZE
         int response_len = 0;
+        char *response_body = (char *) malloc((BUFFER_SIZE - HEADER_SIZE) * sizeof(char));
         int response_body_len = 0;
 
         int file_fd = open(file_path, O_RDONLY);
@@ -60,6 +59,10 @@ void *handle_client(void *arg)
                 //build_post_reponse();
                 // Not implemented yet
                 // No idea how to do it or how it works
+                // To be fair this doesn't really make sense with the way the server works now
+                // Since even if you passed any variables using a form, there is no way of doing anything with them
+                // Because the server doesn't process any code like PHP for example
+                // And I don't feel like implementing any interpreter for that :D
             }
         }
         else
